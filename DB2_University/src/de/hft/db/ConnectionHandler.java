@@ -17,12 +17,10 @@ public class ConnectionHandler {
 	private Connection _connection;
 
 	private ConnectionHandler() {
-
-		
 		try {
 			Class.forName("org.hsqldb.jdbc.JDBCDriver" );
 			_connection = DriverManager.getConnection("jdbc:hsqldb:file:/" + System.getProperty("user.dir")
-					+ "/database/HSQLDB;shutdown=true;ifexists=true", "SA", "");
+					+ "/database/HSQLDB;shutdown=true", "SA", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
