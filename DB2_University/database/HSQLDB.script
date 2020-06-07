@@ -1,4 +1,4 @@
-SET DATABASE UNIQUE NAME HSQLDB725ABFA510
+SET DATABASE UNIQUE NAME HSQLDB72902F80D9
 SET DATABASE GC 0
 SET DATABASE DEFAULT RESULT MEMORY ROWS 0
 SET DATABASE EVENT LOG LEVEL 0
@@ -31,6 +31,15 @@ SET FILES LOG SIZE 50
 CREATE USER SA PASSWORD DIGEST 'd41d8cd98f00b204e9800998ecf8427e'
 ALTER USER SA SET LOCAL TRUE
 CREATE SCHEMA PUBLIC AUTHORIZATION DBA
+SET SCHEMA PUBLIC
+CREATE MEMORY TABLE PUBLIC.STUDENT(MATRICULATIONNO INTEGER NOT NULL PRIMARY KEY,FIRSTNAME CHARACTER(50),LASTNAME CHARACTER(50),COURSENO INTEGER NOT NULL,AVARAGEGRADE DOUBLE)
+CREATE MEMORY TABLE PUBLIC.GRADES(MATRICULATIONNO INTEGER NOT NULL,SUBJECTNO INTEGER NOT NULL,GRADE DOUBLE,FOREIGN KEY(MATRICULATIONNO) REFERENCES PUBLIC.STUDENT(MATRICULATIONNO))
+CREATE MEMORY TABLE PUBLIC.COURSE(COURSENO INTEGER NOT NULL PRIMARY KEY,COURSENAME CHARACTER(100))
+CREATE MEMORY TABLE PUBLIC.SUBJECT(SUBJECTNO INTEGER NOT NULL PRIMARY KEY,SUBJECTNAME CHARACTER(100),CREDITPOINTS INTEGER NOT NULL,COURSENO INTEGER NOT NULL,PROFESSORNO INTEGER NOT NULL,FOREIGN KEY(COURSENO) REFERENCES PUBLIC.COURSE(COURSENO))
+CREATE MEMORY TABLE PUBLIC.PROFESSOR(PROFESSORNO INTEGER NOT NULL PRIMARY KEY,FIRSTNAME CHARACTER(50),LASTNAME CHARACTER(50))
+ALTER TABLE PUBLIC.STUDENT ADD FOREIGN KEY(COURSENO) REFERENCES PUBLIC.COURSE(COURSENO)
+ALTER TABLE PUBLIC.GRADES ADD FOREIGN KEY(SUBJECTNO) REFERENCES PUBLIC.SUBJECT(SUBJECTNO)
+ALTER TABLE PUBLIC.SUBJECT ADD FOREIGN KEY(PROFESSORNO) REFERENCES PUBLIC.PROFESSOR(PROFESSORNO)
 ALTER SEQUENCE SYSTEM_LOBS.LOB_ID RESTART WITH 1
 SET DATABASE DEFAULT INITIAL SCHEMA PUBLIC
 GRANT USAGE ON DOMAIN INFORMATION_SCHEMA.SQL_IDENTIFIER TO PUBLIC
@@ -41,3 +50,37 @@ GRANT USAGE ON DOMAIN INFORMATION_SCHEMA.CHARACTER_DATA TO PUBLIC
 GRANT DBA TO SA
 SET SCHEMA SYSTEM_LOBS
 INSERT INTO BLOCKS VALUES(0,2147483647,0)
+SET SCHEMA PUBLIC
+INSERT INTO STUDENT VALUES(11111,'Thanh Luong                                       ','Giang                                             ',1,4.0E0)
+INSERT INTO STUDENT VALUES(22222,'Clark                                             ','Kent                                              ',1,2.7E0)
+INSERT INTO STUDENT VALUES(33333,'Diana                                             ','Prince                                            ',2,2.0E0)
+INSERT INTO STUDENT VALUES(44444,'Tim                                               ','Drake                                             ',2,1.0E0)
+INSERT INTO STUDENT VALUES(55555,'Babara                                            ','Gordon                                            ',3,3.3E0)
+INSERT INTO STUDENT VALUES(66666,'Pamela Lillian                                    ','Isley                                             ',3,1.7E0)
+INSERT INTO GRADES VALUES(11111,10,4.0E0)
+INSERT INTO GRADES VALUES(11111,20,4.0E0)
+INSERT INTO GRADES VALUES(22222,10,2.7E0)
+INSERT INTO GRADES VALUES(22222,20,2.7E0)
+INSERT INTO GRADES VALUES(33333,40,2.0E0)
+INSERT INTO GRADES VALUES(33333,50,2.0E0)
+INSERT INTO GRADES VALUES(44444,40,1.0E0)
+INSERT INTO GRADES VALUES(44444,50,1.0E0)
+INSERT INTO GRADES VALUES(55555,70,3.3E0)
+INSERT INTO GRADES VALUES(55555,80,3.3E0)
+INSERT INTO GRADES VALUES(66666,70,1.7E0)
+INSERT INTO GRADES VALUES(66666,80,1.7E0)
+INSERT INTO COURSE VALUES(1,'Master Software Technology                                                                          ')
+INSERT INTO COURSE VALUES(2,'Master Math                                                                                         ')
+INSERT INTO COURSE VALUES(3,'Bachelor Arts                                                                                       ')
+INSERT INTO SUBJECT VALUES(10,'Software Project Management                                                                         ',10,1,100)
+INSERT INTO SUBJECT VALUES(20,'Database                                                                                            ',6,1,100)
+INSERT INTO SUBJECT VALUES(30,'Software Engineering                                                                                ',8,1,100)
+INSERT INTO SUBJECT VALUES(40,'Algebra                                                                                             ',12,2,200)
+INSERT INTO SUBJECT VALUES(50,'Combinatorics                                                                                       ',4,2,200)
+INSERT INTO SUBJECT VALUES(60,'Probability and Statistics                                                                          ',7,2,200)
+INSERT INTO SUBJECT VALUES(70,'Sport                                                                                               ',5,3,300)
+INSERT INTO SUBJECT VALUES(80,'Medicine                                                                                            ',10,3,300)
+INSERT INTO SUBJECT VALUES(90,'Biology                                                                                             ',7,3,300)
+INSERT INTO PROFESSOR VALUES(100,'Robert                                            ','Langdon                                           ')
+INSERT INTO PROFESSOR VALUES(200,'Hari                                              ','Seldon                                            ')
+INSERT INTO PROFESSOR VALUES(300,'Bruce                                             ','Wayne                                             ')
