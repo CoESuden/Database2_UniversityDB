@@ -32,22 +32,6 @@ public class SQLStatementsUtil {
 		// empty util class
 	}
 
-	public static void runDatabaseSchema() {
-		try (Statement statement = ConnectionHandler.getInstance().getCurrerntConnection().createStatement()) {
-			statement.execute(CREATE_TABLE + STUDENT_TABLE_NAME + OPEN_BRACKETS //
-					+ MATRICULATION_NUMBER + INTEGER_NOT_NULL + COMMA //
-					+ FIRST_NAME + " CHAR(50) NOT NULL" + COMMA //
-					+ LAST_NAME + " CHAR(50) NOT NULL" + COMMA //
-					+ STUDY_COURSE + " CHAR(100) NOT NULL" + COMMA //
-					+ AVARAGE_GRADE + " DOUBLE " + COMMA //
-					+ PRIMARY_KEY + OPEN_BRACKETS + MATRICULATION_NUMBER + CLOSE_BRACKETS + CLOSE_BRACKETS);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		ConnectionHandler.getInstance().commit();
-	}
-
 	public static void createTestDataForStudent() {
 		try (Statement statement = ConnectionHandler.getInstance().getCurrerntConnection().createStatement()) {
 			statement.executeUpdate(INSERT_INTO + STUDENT_TABLE_NAME + OPEN_BRACKETS + MATRICULATION_NUMBER + COMMA //

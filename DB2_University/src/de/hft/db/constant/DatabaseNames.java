@@ -47,7 +47,6 @@ public enum DatabaseNames {
 	TABLE_PROFESSOR_COLUMN_FIRST_NAME("FirstName"),
 	TABLE_PROFESSOR_COLUMN_LAST_NAME("LastName");
 	
-	
 	String _string = "";
 
 	DatabaseNames(String string) {
