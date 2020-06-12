@@ -7,7 +7,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import de.hft.gui.view.CourseView;
+import de.hft.gui.view.GradesView;
+import de.hft.gui.view.ProfessorView;
 import de.hft.gui.view.StudentView;
+import de.hft.gui.view.SubjectView;
 
 public class MainWindow {
 
@@ -39,7 +43,11 @@ public class MainWindow {
 		_tabSubject.setText("Subject");
 		_tabGrades.setText("Grades");
 
+		_tabCourse.setControl(CourseView.createCourseView(_tabFolder));
 		_tabStudent.setControl(StudentView.createStudentView(_tabFolder));
+		_tabProfessor.setControl(ProfessorView.createProfessorView(_tabFolder));
+		_tabSubject.setControl(SubjectView.createSubjectView(_tabFolder));
+		_tabGrades.setControl(GradesView.createGradesView(_tabFolder));
 		
 		
 		
