@@ -40,9 +40,9 @@ public class SubjectView {
 	private static Label _creditPointsLabel;
 	private static Text _creditPointsText;
 	private static Label _courseNoLabel;
-	public static Combo _courseNoCombo;
+	private static Combo _courseNoCombo;
 	private static Label _professorNoLabel;
-	public static Combo _professorNoCombo;
+	private static Combo _professorNoCombo;
 
 	private static Button _insertIntoButton;
 
@@ -116,13 +116,9 @@ public class SubjectView {
 
 		try {
 			ResultSet rsSubject = SubjectSQLStatements.selectAllFromSubject();
-			ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();
-			ResultSet rsProf = ProfessorSQLStatements.selectAllFromProfessor();
 			ResultSetMetaData rsmd = rsSubject.getMetaData();
 
 			_table.removeAll();
-			_courseNoCombo.removeAll();
-			_professorNoCombo.removeAll();
 
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				TableColumn column = new TableColumn(_table, SWT.NONE);
@@ -142,15 +138,7 @@ public class SubjectView {
 			for (int i = 0; i < rsmd.getColumnCount(); i++) {
 				_table.getColumn(i).pack();
 			}
-
-			while (rsCourse.next()) {
-				_courseNoCombo.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
-			}
-			
-			while (rsProf.next()) {
-				_professorNoCombo.add((rsProf.getInt(1) + "," + rsProf.getString(2)+ "," + rsProf.getString(3)).replace("  ", ""));
-			}
-
+			refreshSubjectComboBox();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -186,20 +174,23 @@ public class SubjectView {
 			}
 
 		});
-		
-		_courseNoCombo.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				insertAllSQLDataIntoTableData();
-				
+	}
+
+	public static void refreshSubjectComboBox() {
+		_courseNoCombo.removeAll();
+		_professorNoCombo.removeAll();
+		try (ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();
+				ResultSet rsProf = ProfessorSQLStatements.selectAllFromProfessor();) {
+			while (rsCourse.next()) {
+				_courseNoCombo.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				insertAllSQLDataIntoTableData();
+			while (rsProf.next()) {
+				_professorNoCombo.add(
+						(rsProf.getInt(1) + "," + rsProf.getString(2) + "," + rsProf.getString(3)).replace("  ", ""));
 			}
-		});
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
 	}
 }

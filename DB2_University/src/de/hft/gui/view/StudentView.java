@@ -43,7 +43,7 @@ public class StudentView {
 	private static Label _gradeLabel;
 	private static Text _gradeText;
 	private static Label _courseLabel;
-	public static Combo _comboCourse;
+	private static Combo _comboCourse;
 
 	public static Group createStudentView(TabFolder folder) {
 		_group = new Group(folder, SWT.NONE);
@@ -117,10 +117,9 @@ public class StudentView {
 		try {
 			ResultSet rsStudent = StudentSQLStatements.selectAllFromStudent();
 			ResultSetMetaData rsmdStudent = rsStudent.getMetaData();
-			ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();
 
 			_table.removeAll();
-			_comboCourse.removeAll();
+			
 			
 			for (int i = 1; i <= rsmdStudent.getColumnCount(); i++) {
 				TableColumn column = new TableColumn(_table, SWT.NONE);
@@ -141,9 +140,8 @@ public class StudentView {
 				_table.getColumn(i).pack();
 			}
 
-			while (rsCourse.next()) {
-				_comboCourse.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
-			}
+			
+			 refreshStudentComboBox() ;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -176,5 +174,16 @@ public class StudentView {
 		});
 		
 		
+	}
+	
+	public static void refreshStudentComboBox() {
+		_comboCourse.removeAll();
+		try (ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();){
+			while (rsCourse.next()) {
+				_comboCourse.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

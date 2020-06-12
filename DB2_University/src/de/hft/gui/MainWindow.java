@@ -1,6 +1,8 @@
 package de.hft.gui;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -16,27 +18,26 @@ import de.hft.gui.view.SubjectView;
 public class MainWindow {
 
 	private static final MainWindow MAIN_WINDOW = new MainWindow();
-	
+
 	private Display _display = new Display();
 	private Shell _shell = new Shell(_display);
-	
+
 	private TabFolder _tabFolder = new TabFolder(_shell, SWT.NONE);
-	private TabItem _tabStudent = new TabItem(_tabFolder,SWT.NONE);
-	private TabItem _tabProfessor = new TabItem(_tabFolder,SWT.NONE);
-	private TabItem _tabCourse= new TabItem(_tabFolder,SWT.NONE);
-	private TabItem _tabGrades = new TabItem(_tabFolder,SWT.NONE);
-	private TabItem _tabSubject= new TabItem(_tabFolder,SWT.NONE);
-	
+	private TabItem _tabStudent = new TabItem(_tabFolder, SWT.NONE);
+	private TabItem _tabProfessor = new TabItem(_tabFolder, SWT.NONE);
+	private TabItem _tabCourse = new TabItem(_tabFolder, SWT.NONE);
+	private TabItem _tabGrades = new TabItem(_tabFolder, SWT.NONE);
+	private TabItem _tabSubject = new TabItem(_tabFolder, SWT.NONE);
+
 	public static MainWindow getInstance() {
 		return MAIN_WINDOW;
 	}
-	
-	
+
 	private MainWindow() {
-		
+
 		_shell.setText("Database II Pre-Exam");
 		_shell.setLayout(new FillLayout());
-		
+
 		_tabStudent.setText("Student");
 		_tabProfessor.setText("Professor");
 		_tabCourse.setText("Course");
@@ -48,29 +49,25 @@ public class MainWindow {
 		_tabProfessor.setControl(ProfessorView.createProfessorView(_tabFolder));
 		_tabSubject.setControl(SubjectView.createSubjectView(_tabFolder));
 		_tabGrades.setControl(GradesView.createGradesView(_tabFolder));
-		
-		
-		
+
+		setListeners();
 	}
-	
-	
-	
-	
+
 	private void setListeners() {
+		_tabFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				refreshAll();
+			}
+		});
+	}
+
+	private void refreshAll() {
+		GradesView.refreshGradesComboBox();
+		StudentView.refreshStudentComboBox();
+		SubjectView.refreshSubjectComboBox();
 		
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	public void run() {
 		_shell.open();
@@ -81,5 +78,5 @@ public class MainWindow {
 		}
 		_display.dispose();
 	}
-	
+
 }

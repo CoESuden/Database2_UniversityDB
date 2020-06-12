@@ -34,9 +34,9 @@ public class GradesView {
 
 	private static Composite _insertComposite;
 	private static Label _matrNoLabel;
-	public static Combo _matrNoLCombo;
+	private static Combo _matrNoLCombo;
 	private static Label _subjectNoLabel;
-	public static Combo _subjectNoCombo;
+	private static Combo _subjectNoCombo;
 	private static Label _gradeLabel;
 	private static Text _gradeText;
 
@@ -52,7 +52,7 @@ public class GradesView {
 		GridData dataComposite = new GridData(GridData.FILL, SWT.FILL, false, true);
 		dataComposite.horizontalSpan = 1;
 		_leftComposite.setLayoutData(dataComposite);
-		
+
 		_insertComposite = new Composite(_leftComposite, SWT.BORDER);
 		GridLayout insertLayout = new GridLayout(2, true);
 		_insertComposite.setLayout(insertLayout);
@@ -66,7 +66,7 @@ public class GradesView {
 		_insertIntoButton.setLayoutData(dataInsert);
 
 		GridData textData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		
+
 		_gradeLabel = new Label(_insertComposite, SWT.NONE);
 		_gradeLabel.setText("Grade:");
 		_gradeText = new Text(_insertComposite, SWT.BORDER);
@@ -82,7 +82,6 @@ public class GradesView {
 		_subjectNoCombo = new Combo(_insertComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		_subjectNoCombo.setLayoutData(textData);
 
-	
 		_rightComposite = new Composite(_group, SWT.NONE);
 		_rightComposite.setLayout(new FillLayout());
 		GridData dataComposite2 = new GridData(GridData.FILL, SWT.FILL, true, true);
@@ -96,8 +95,7 @@ public class GradesView {
 		insertAllSQLDataIntoTableData();
 		_table.pack();
 
-		
-		 setListener();
+		setListener();
 		return _group;
 	}
 
@@ -105,14 +103,10 @@ public class GradesView {
 
 		try {
 			ResultSet rsGrades = GradesSQLStatements.selectAllFromGrades();
-			ResultSet rsStudent = StudentSQLStatements.selectAllFromStudent();
-			ResultSet rsSubject = SubjectSQLStatements.selectAllFromSubject();
 			ResultSetMetaData rsmd = rsGrades.getMetaData();
 
 			_table.removeAll();
-			_matrNoLCombo.removeAll();
-			_subjectNoCombo.removeAll();
-			
+
 			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 				TableColumn column = new TableColumn(_table, SWT.NONE);
 				column.setText(rsmd.getColumnLabel(i));
@@ -128,27 +122,21 @@ public class GradesView {
 			for (int i = 0; i < rsmd.getColumnCount(); i++) {
 				_table.getColumn(i).pack();
 			}
-
-			while (rsStudent.next()) {
-				_matrNoLCombo.add((rsStudent.getInt(1) + "," + rsStudent.getString(2) + "," + rsStudent.getString(3)).replace("  ", ""));
-			}
-			while (rsSubject.next()) {
-				_subjectNoCombo.add((rsSubject.getInt(1) + "," + rsSubject.getString(2)).replace("  ", ""));
-			}
-
+			refreshGradesComboBox();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	private static void setListener() {
 		_insertIntoButton.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				int matrNo = Integer.parseInt(_matrNoLCombo.getItem(_matrNoLCombo.getSelectionIndex()).split(",")[0]);
-				int subjectNo = Integer.parseInt(_subjectNoCombo.getItem(_subjectNoCombo.getSelectionIndex()).split(",")[0]);
+				int subjectNo = Integer
+						.parseInt(_subjectNoCombo.getItem(_subjectNoCombo.getSelectionIndex()).split(",")[0]);
 				double grade = Double.parseDouble(_gradeText.getText());
 				GradesSQLStatements.insertGrades(matrNo, subjectNo, grade);
 				insertAllSQLDataIntoTableData();
@@ -157,12 +145,31 @@ public class GradesView {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				int matrNo = Integer.parseInt(_matrNoLCombo.getItem(_matrNoLCombo.getSelectionIndex()).split(",")[0]);
-				int subjectNo = Integer.parseInt(_subjectNoCombo.getItem(_subjectNoCombo.getSelectionIndex()).split(",")[0]);
+				int subjectNo = Integer
+						.parseInt(_subjectNoCombo.getItem(_subjectNoCombo.getSelectionIndex()).split(",")[0]);
 				double grade = Double.parseDouble(_gradeText.getText());
 				GradesSQLStatements.insertGrades(matrNo, subjectNo, grade);
 				insertAllSQLDataIntoTableData();
 			}
 		});
-		
+
+	}
+
+	public static void refreshGradesComboBox() {
+		_matrNoLCombo.removeAll();
+		_subjectNoCombo.removeAll();
+		try (ResultSet rsStudent = StudentSQLStatements.selectAllFromStudent(); //
+				ResultSet rsSubject = SubjectSQLStatements.selectAllFromSubject();) {
+			while (rsStudent.next()) {
+				_matrNoLCombo.add((rsStudent.getInt(1) + "," + rsStudent.getString(2) + "," + rsStudent.getString(3))
+						.replace("  ", ""));
+			}
+			while (rsSubject.next()) {
+				_subjectNoCombo.add((rsSubject.getInt(1) + "," + rsSubject.getString(2)).replace("  ", ""));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 	}
 }
