@@ -39,4 +39,28 @@ public class ProfessorSQLStatements {
 		}
 	}
 	
+	public static ResultSet getAllSubjectsFromProfessor(int courseNo) {
+		String getAllStudentFromCourse = "SELECT " + DatabaseNames.TABLE_PROFESSOR_NAME + "."
+				+ DatabaseNames.TABLE_PROFESSOR_COLUMN_PROFRESSOR_NO_PRIMARY_KEY + "," //
+				+ DatabaseNames.TABLE_PROFESSOR_NAME + "." + DatabaseNames.TABLE_PROFESSOR_COLUMN_FIRST_NAME + "," //
+				+ DatabaseNames.TABLE_PROFESSOR_NAME + "." + DatabaseNames.TABLE_PROFESSOR_COLUMN_LAST_NAME + ","//
+				+ "jointable." + DatabaseNames.TABLE_SUBJECT_COLUMN_SUBJECT_NO_PRIMARY_KEY + ","//
+				+ "jointable." + DatabaseNames.TABLE_SUBJECT_COLUMN_SUBJECT_NAME + "," //
+				+ "jointable." + DatabaseNames.TABLE_SUBJECT_COLUMN_CREDIT_POINTS  //
+				+ " FROM " + DatabaseNames.TABLE_PROFESSOR_NAME //
+				+ " JOIN " + DatabaseNames.TABLE_SUBJECT_NAME + " jointable ON " //
+				+ DatabaseNames.TABLE_PROFESSOR_NAME + "." + DatabaseNames.TABLE_SUBJECT_COLUMN_PROFESSOR_NO_FOREIGN_KEY
+				+ " = " //
+				+ "jointable." + DatabaseNames.TABLE_SUBJECT_COLUMN_PROFESSOR_NO_FOREIGN_KEY//
+				+ " WHERE jointable." + DatabaseNames.TABLE_SUBJECT_COLUMN_PROFESSOR_NO_FOREIGN_KEY + " = ?"; //
+		try (PreparedStatement statement = ConnectionHandler.getInstance().getCurrerntConnection().prepareStatement(getAllStudentFromCourse)) {
+			statement.setInt(1, courseNo);
+			return statement.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+	
 }

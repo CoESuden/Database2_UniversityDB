@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import de.hft.db.sqlstatements.CourseSQLStatements;
 import de.hft.db.sqlstatements.ProfessorSQLStatements;
 import de.hft.db.sqlstatements.StudentSQLStatements;
 
@@ -31,8 +32,6 @@ public class ProfessorView {
 	private static Composite _rightComposite;
 	private static Button _insertIntoButton;
 	
-	
-	
 	private static Composite _insertComposite;
 	private static Label _professorNoLabel;
 	private static Text _professorNoText;
@@ -40,6 +39,11 @@ public class ProfessorView {
 	private static Text _professorFirsNameText;
 	private static Label _professorLastNameLabel;
 	private static Text _professorLastNameText;
+	
+	private static Composite _getAllSubjectComposite;
+	private static Button _getAllProfessorSubjectButton;
+	private static Label _getAllSubjectLabel;
+	private static Combo _getAllSubjectCombo;
 	
 	public static Group createProfessorView(TabFolder folder) {
 		_group = new Group(folder, SWT.NONE);
@@ -81,6 +85,24 @@ public class ProfessorView {
 		_professorLastNameLabel.setText("Last Name:");
 		_professorLastNameText = new Text(_insertComposite, SWT.BORDER);
 		_professorLastNameText.setLayoutData(textData);
+		
+		
+		_getAllSubjectComposite = new Composite(_leftComposite, SWT.BORDER);
+		_getAllSubjectComposite.setLayout(insertLayout);
+		GridData getAllProfessorSubjectCompositeData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		getAllProfessorSubjectCompositeData.horizontalSpan = 2;
+		_getAllSubjectComposite.setLayoutData(insertComposite);
+		_getAllSubjectComposite.setLayoutData(getAllProfessorSubjectCompositeData);
+
+		_getAllProfessorSubjectButton = new Button(_getAllSubjectComposite, SWT.PUSH);
+		_getAllProfessorSubjectButton.setLayoutData(dataInsert);
+		_getAllProfessorSubjectButton.setText("Get Subjects from");
+
+		_getAllSubjectLabel = new Label(_getAllSubjectComposite, SWT.NONE);
+		_getAllSubjectLabel.setText("Professor:");
+		_getAllSubjectCombo = new Combo(_getAllSubjectComposite,
+				SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+		_getAllSubjectCombo.setLayoutData(textData);
 
 
 		_rightComposite = new Composite(_group, SWT.NONE);
@@ -108,11 +130,20 @@ public class ProfessorView {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			
 			_table.removeAll();
+			removeHeader();
+			
 			if(_table.getColumnCount() == 0) {
-				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+				
+				for (int i = 1; i <= 6; i++) {
 					TableColumn column = new TableColumn(_table, SWT.NONE);
-					column.setText(rsmd.getColumnLabel(i));
 				}
+				
+				int j = 0;
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					_table.getColumn(j).setText(rsmd.getColumnLabel(i));
+					j++;
+				}
+				
 			} else {
 				int j = 0;
 				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
@@ -121,6 +152,8 @@ public class ProfessorView {
 				}
 				
 			}
+			
+			
 			while(rs.next()) {
 				TableItem item = new TableItem(_table, SWT.NONE);
 				item.setText(0,rs.getInt(1) + "");
@@ -129,6 +162,7 @@ public class ProfessorView {
 			}
 			rs.close();
 			
+			refreshCourseComboBox();
 			 for (int i = 0; i <rsmd.getColumnCount(); i++) {
 			      _table.getColumn(i).pack();
 			    }
@@ -157,5 +191,70 @@ public class ProfessorView {
 
 		});
 		
+		_getAllProfessorSubjectButton.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				addJoinSubjectCourseToTable();
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				addJoinSubjectCourseToTable();
+			}
+
+			private void addJoinSubjectCourseToTable() {
+				_table.removeAll();
+				removeHeader();
+				int courseNo = Integer.parseInt(
+						_getAllSubjectCombo.getItem(_getAllSubjectCombo.getSelectionIndex()).split(",")[0]);
+				try (ResultSet rs = ProfessorSQLStatements.getAllSubjectsFromProfessor(courseNo)) {
+				
+					_table.getColumn(0).setText("PROFESSORNO");
+					_table.getColumn(1).setText("FIRSTNAME");
+					_table.getColumn(2).setText("LASTNAME");
+					_table.getColumn(3).setText("SUBJECTNO");
+					_table.getColumn(4).setText("SUBJECTNAME");
+					_table.getColumn(5).setText("CREDITPOINTS");
+					
+					while (rs.next()) {
+						TableItem item = new TableItem(_table, SWT.NONE);
+						item.setText(0, rs.getInt(1) + "");
+						item.setText(1, rs.getString(2) + "");
+						item.setText(2, rs.getString(3) + "");
+						item.setText(3, rs.getInt(4) + "");
+						item.setText(4, rs.getString(5) + "");
+						item.setText(5, rs.getInt(6) + "");
+					}
+
+					for (int i = 0; i < _table.getColumnCount(); i++) {
+						_table.getColumn(i).pack();
+					}
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
+		
+	}
+	
+	public static void refreshCourseComboBox() {
+		_getAllSubjectCombo.removeAll();
+		try (ResultSet rsProfessor = ProfessorSQLStatements.selectAllFromProfessor();) {
+			while (rsProfessor.next()) {
+				_getAllSubjectCombo.add((rsProfessor.getInt(1) + "," + rsProfessor.getString(2) + "," + rsProfessor.getString(3)).replace("  ", ""));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void removeHeader() {
+		TableColumn[] columns = _table.getColumns();
+        for (int i = 0; i < columns.length; i++) {
+            columns[i].setText("");
+        }
 	}
 }

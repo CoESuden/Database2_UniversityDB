@@ -65,6 +65,7 @@ public class MainWindow {
 					StudentView.insertAllSQLDataIntoTableData();
 				} else if (event.item.toString().contains("Professor")) {
 					ProfessorView.insertAllSQLDataIntoTableData();
+					ProfessorView.refreshCourseComboBox();
 				} else if (event.item.toString().contains("Course")) {
 					CourseView.insertAllSQLDataIntoTableData();
 					CourseView.refreshCourseComboBox();
