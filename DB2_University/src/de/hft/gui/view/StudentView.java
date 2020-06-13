@@ -225,10 +225,10 @@ public class StudentView {
 				try (ResultSet rs = StudentSQLStatements.getAllStudentFromCourse(courseNo)) {
 				
 					_table.getColumn(0).setText("MATRICULATIONNO");
-					_table.getColumn(1).setText("MATRICULATIONNO");
-					_table.getColumn(2).setText("MATRICULATIONNO");
-					_table.getColumn(3).setText("MATRICULATIONNO");
-					_table.getColumn(4).setText("MATRICULATIONNO");
+					_table.getColumn(1).setText("FIRSTNAME");
+					_table.getColumn(2).setText("LASTNAME");
+					_table.getColumn(3).setText("COURSENAME");
+					_table.getColumn(4).setText("AVARAGEGRADE");
 					
 					while (rs.next()) {
 						TableItem item = new TableItem(_table, SWT.NONE);
