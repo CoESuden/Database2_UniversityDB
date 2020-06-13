@@ -45,6 +45,11 @@ public class ProfessorView {
 	private static Label _getAllSubjectLabel;
 	private static Combo _getAllSubjectCombo;
 	
+	private static Composite _calculateCreditPoints;
+	private static Button _calculateCreditPointsButton;
+	private static Label _calculateCreditPointsLabel;
+	private static Combo _calculateCreditPointsCombo;
+	
 	public static Group createProfessorView(TabFolder folder) {
 		_group = new Group(folder, SWT.NONE);
 		_group.setLayout(new GridLayout(4,true));
@@ -104,6 +109,21 @@ public class ProfessorView {
 				SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		_getAllSubjectCombo.setLayoutData(textData);
 
+		
+		_calculateCreditPoints = new Composite(_leftComposite, SWT.BORDER);
+		_calculateCreditPoints.setLayout(insertLayout);
+		_calculateCreditPoints.setLayoutData(insertComposite);
+		_calculateCreditPoints.setLayoutData(getAllProfessorSubjectCompositeData);
+		_calculateCreditPointsButton = new Button(_calculateCreditPoints, SWT.PUSH);
+		_calculateCreditPointsButton.setLayoutData(dataInsert);
+		_calculateCreditPointsButton.setText("Get CreditPoints of");
+		_calculateCreditPointsLabel = new Label(_calculateCreditPoints, SWT.NONE);
+		_calculateCreditPointsLabel.setText("Professor:");
+		
+		_calculateCreditPointsCombo = new Combo(_calculateCreditPoints,
+				SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+		_calculateCreditPointsCombo.setLayoutData(textData);
+		
 
 		_rightComposite = new Composite(_group, SWT.NONE);
 		_rightComposite.setLayout(new FillLayout());
@@ -238,13 +258,58 @@ public class ProfessorView {
 
 		});
 		
+		_calculateCreditPointsButton.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				addJoinCreditPointsToTable();
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				addJoinCreditPointsToTable();
+			}
+
+			private void addJoinCreditPointsToTable() {
+				_table.removeAll();
+				removeHeader();
+				int courseNo = Integer.parseInt(
+						_calculateCreditPointsCombo.getItem(_calculateCreditPointsCombo.getSelectionIndex()).split(",")[0]);
+				try (ResultSet rs = ProfessorSQLStatements.calculateCreditPointsSum(courseNo)) {
+				
+					_table.getColumn(0).setText("PROFESSORNO");
+					_table.getColumn(1).setText("FIRSTNAME");
+					_table.getColumn(2).setText("LASTNAME");
+					_table.getColumn(3).setText("SUMOFCREDITPOINTS");
+					
+					while (rs.next()) {
+						TableItem item = new TableItem(_table, SWT.NONE);
+						item.setText(0, rs.getInt(1) + "");
+						item.setText(1, rs.getString(2) + "");
+						item.setText(2, rs.getString(3) + "");
+						item.setText(3, rs.getInt(4) + "");
+					}
+
+					for (int i = 0; i < _table.getColumnCount(); i++) {
+						_table.getColumn(i).pack();
+					}
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
+		
 	}
 	
 	public static void refreshCourseComboBox() {
 		_getAllSubjectCombo.removeAll();
+		_calculateCreditPointsCombo.removeAll();
 		try (ResultSet rsProfessor = ProfessorSQLStatements.selectAllFromProfessor();) {
 			while (rsProfessor.next()) {
 				_getAllSubjectCombo.add((rsProfessor.getInt(1) + "," + rsProfessor.getString(2) + "," + rsProfessor.getString(3)).replace("  ", ""));
+				_calculateCreditPointsCombo.add((rsProfessor.getInt(1) + "," + rsProfessor.getString(2) + "," + rsProfessor.getString(3)).replace("  ", ""));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
