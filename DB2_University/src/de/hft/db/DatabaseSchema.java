@@ -14,12 +14,25 @@ public class DatabaseSchema {
 	public static void runDBSchema() {
 
 		try (Statement statement = ConnectionHandler.getInstance().getCurrerntConnection().createStatement()) {
+			
+			String dropTableStudent = "DROP TABLE " +DatabaseNames.TABLE_STUDENT_NAME  + " IF EXISTS CASCADE";
+			String dropTableProfessor ="DROP TABLE " +DatabaseNames.TABLE_PROFESSOR_NAME  + " IF EXISTS CASCADE";
+			String dropTableGrades ="DROP TABLE " +DatabaseNames.TABLE_GRADES_NAME  + " IF EXISTS CASCADE";
+			String dropTableCourse ="DROP TABLE " +DatabaseNames.TABLE_COURSE_NAME  + " IF EXISTS CASCADE";
+			String dropTableSubject ="DROP TABLE " +DatabaseNames.TABLE_SUBJECT_NAME  + " IF EXISTS CASCADE";
+			
+			statement.execute(dropTableStudent);
+			statement.execute(dropTableProfessor);
+			statement.execute(dropTableGrades);
+			statement.execute(dropTableCourse);
+			statement.execute(dropTableSubject);
+			
 			String createStudentTable = "CREATE TABLE " + DatabaseNames.TABLE_STUDENT_NAME + "(" //
 					+ DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY + " INTEGER NOT NULL," //
 					+ DatabaseNames.TABLE_STUDENT_COLUMN_FIRST_NAME + " CHAR(50)," //
 					+ DatabaseNames.TABLE_STUDENT_COLUMN_LAST_NAME + " CHAR(50)," //
 					+ DatabaseNames.TABLE_STUDENT_COLUMN_COURSE_NO_FORGEIN_KEY + " INTEGER NOT NULL," //
-					+ DatabaseNames.TABLE_STUDENT_COLUMN_AVARAGE_GRADE + " DOUBLE," //
+					+ DatabaseNames.TABLE_STUDENT_COLUMN_AVERAGE_GRADE + " DOUBLE," //
 					+ "PRIMARY KEY (" + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY + ")" //
 					+ ")";
 
@@ -132,7 +145,7 @@ public class DatabaseSchema {
 					+ DatabaseNames.TABLE_STUDENT_COLUMN_FIRST_NAME + "," //
 					+ DatabaseNames.TABLE_STUDENT_COLUMN_LAST_NAME + "," //
 					+ DatabaseNames.TABLE_STUDENT_COLUMN_COURSE_NO_FORGEIN_KEY + "," //
-					+ DatabaseNames.TABLE_STUDENT_COLUMN_AVARAGE_GRADE //
+					+ DatabaseNames.TABLE_STUDENT_COLUMN_AVERAGE_GRADE //
 					+ ") VALUES (" //
 					+ "(11111, 'Thanh Luong','Giang',1,4.0)," //
 					+ "(22222, 'Clark','Kent',1,2.7)," //
@@ -163,6 +176,44 @@ public class DatabaseSchema {
 			statement.execute(insertIntoSubjectTestData);
 			statement.execute(insertIntoStudentTestData);
 			statement.execute(insertIntoGradesTestData);
+			
+			String triggerUpdateGrade = "CREATE TRIGGER t_updateGrade AFTER UPDATE ON " + DatabaseNames.TABLE_GRADES_NAME //
+					+ " REFERENCING NEW AS newRow" //
+					+ " FOR EACH ROW " //
+					+ " UPDATE " + DatabaseNames.TABLE_STUDENT_NAME //
+					+ " SET " + DatabaseNames.TABLE_STUDENT_COLUMN_AVERAGE_GRADE + " = " //
+					+ " (SELECT AVG(" + DatabaseNames.TABLE_GRADES_COLUMN_GRADE + ") FROM " + DatabaseNames.TABLE_GRADES_NAME //
+					+ " WHERE " + DatabaseNames.TABLE_GRADES_NAME + "." + DatabaseNames.TABLE_GRADES_COLUMN_MATRICULATION_NO_FORFORGEIN_KEY+ " = newRow." //
+								+ DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY + ")" //
+					+ " WHERE " + DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY //
+					+  " = newRow." + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY; //
+			
+			String triggerDeleteGrade = "CREATE TRIGGER t_deleteGrade AFTER DELETE ON " + DatabaseNames.TABLE_GRADES_NAME //
+					+ " REFERENCING OLD AS oldRow" //
+					+ " FOR EACH ROW " //
+					+ " UPDATE " + DatabaseNames.TABLE_STUDENT_NAME //
+					+ " SET " + DatabaseNames.TABLE_STUDENT_COLUMN_AVERAGE_GRADE + " = " //
+					+ " (SELECT AVG(" + DatabaseNames.TABLE_GRADES_COLUMN_GRADE + ") FROM " + DatabaseNames.TABLE_GRADES_NAME //
+					+ " WHERE " + DatabaseNames.TABLE_GRADES_NAME + "." + DatabaseNames.TABLE_GRADES_COLUMN_MATRICULATION_NO_FORFORGEIN_KEY + " = oldRow." //
+								+ DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY + ")" //
+					+ " WHERE " + DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY //
+					+  " = oldRow." + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY; //
+			
+			
+			String triggerInsertGrade  = "CREATE TRIGGER t_insertGrade AFTER INSERT ON " + DatabaseNames.TABLE_GRADES_NAME //
+					+ " REFERENCING NEW AS newRow" //
+					+ " FOR EACH ROW " //
+					+ " UPDATE " + DatabaseNames.TABLE_STUDENT_NAME //
+					+ " SET " + DatabaseNames.TABLE_STUDENT_COLUMN_AVERAGE_GRADE + " = " //
+					+ " (SELECT AVG(" + DatabaseNames.TABLE_GRADES_COLUMN_GRADE + ") FROM " + DatabaseNames.TABLE_GRADES_NAME //
+					+ " WHERE " + DatabaseNames.TABLE_GRADES_NAME + "." + DatabaseNames.TABLE_GRADES_COLUMN_MATRICULATION_NO_FORFORGEIN_KEY + " = newRow." //
+								+ DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY + ")" //
+					+ " WHERE " + DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY //
+					+  " = newRow." + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY; //
+			
+			statement.execute(triggerUpdateGrade);
+			statement.execute(triggerDeleteGrade);
+			statement.execute(triggerInsertGrade);
 			
 			
 		} catch (SQLException e) {

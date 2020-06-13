@@ -45,6 +45,11 @@ public class StudentView {
 	private static Label _courseLabel;
 	private static Combo _comboCourse;
 
+	private static Composite _getAllCourseStudentComposite;
+	private static Button _getAllCourseStudentButton;
+	private static Label _courseNameGetAllStudentLabel;
+	private static Combo _courseNameGetAllStudentCombo;
+
 	public static Group createStudentView(TabFolder folder) {
 		_group = new Group(folder, SWT.NONE);
 		_group.setLayout(new GridLayout(4, true));
@@ -95,6 +100,23 @@ public class StudentView {
 		_comboCourse = new Combo(_insertComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		_comboCourse.setLayoutData(textData);
 
+		_getAllCourseStudentComposite = new Composite(_leftComposite, SWT.BORDER);
+		_getAllCourseStudentComposite.setLayout(insertLayout);
+		GridData getAllCourseStudentCompositeData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		getAllCourseStudentCompositeData.horizontalSpan = 2;
+		_getAllCourseStudentComposite.setLayoutData(insertComposite);
+		_getAllCourseStudentComposite.setLayoutData(getAllCourseStudentCompositeData);
+
+		_getAllCourseStudentButton = new Button(_getAllCourseStudentComposite, SWT.PUSH);
+		_getAllCourseStudentButton.setLayoutData(dataInsert);
+		_getAllCourseStudentButton.setText("Get Students from");
+
+		_courseNameGetAllStudentLabel = new Label(_getAllCourseStudentComposite, SWT.NONE);
+		_courseNameGetAllStudentLabel.setText("Course:");
+		_courseNameGetAllStudentCombo = new Combo(_getAllCourseStudentComposite,
+				SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+		_courseNameGetAllStudentCombo.setLayoutData(textData);
+
 		_rightComposite = new Composite(_group, SWT.NONE);
 		_rightComposite.setLayout(new FillLayout());
 		GridData dataComposite2 = new GridData(GridData.FILL, SWT.FILL, true, true);
@@ -113,18 +135,28 @@ public class StudentView {
 		return _group;
 	}
 
-	private static void insertAllSQLDataIntoTableData() {
+	public static void insertAllSQLDataIntoTableData() {
 		try {
 			ResultSet rsStudent = StudentSQLStatements.selectAllFromStudent();
 			ResultSetMetaData rsmdStudent = rsStudent.getMetaData();
 
 			_table.removeAll();
-			
-			
-			for (int i = 1; i <= rsmdStudent.getColumnCount(); i++) {
-				TableColumn column = new TableColumn(_table, SWT.NONE);
-				column.setText(rsmdStudent.getColumnLabel(i));
+			removeHeader();
+
+			if(_table.getColumnCount() == 0) {
+				for (int i = 1; i <= rsmdStudent.getColumnCount(); i++) {
+					TableColumn column = new TableColumn(_table, SWT.NONE);
+					column.setText(rsmdStudent.getColumnLabel(i));
+				}
+			} else {
+				int j = 0;
+				for (int i = 1; i <= rsmdStudent.getColumnCount(); i++) {
+					_table.getColumn(j).setText(rsmdStudent.getColumnLabel(i));
+					j++;
+				}
+				
 			}
+			
 
 			while (rsStudent.next()) {
 				TableItem item = new TableItem(_table, SWT.NONE);
@@ -140,8 +172,7 @@ public class StudentView {
 				_table.getColumn(i).pack();
 			}
 
-			
-			 refreshStudentComboBox() ;
+			refreshStudentComboBox();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -150,9 +181,9 @@ public class StudentView {
 
 	private static void setListener() {
 		_insertIntoButton.addSelectionListener(new SelectionListener() {
-
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
+				System.out.println("WRONG 1");
 				int matrNo = Integer.parseInt(_matrNoText.getText());
 				int courseNo = Integer.parseInt(_comboCourse.getItem(_comboCourse.getSelectionIndex()));
 				double grade = Double.parseDouble(_gradeText.getText());
@@ -163,6 +194,7 @@ public class StudentView {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
+				System.out.println("WRONG 2");
 				int matrNo = Integer.parseInt(_matrNoText.getText());
 				int courseNo = Integer.parseInt(_comboCourse.getItem(_comboCourse.getSelectionIndex()).split(",")[0]);
 				double grade = Double.parseDouble(_gradeText.getText());
@@ -172,18 +204,72 @@ public class StudentView {
 			}
 
 		});
-		
-		
+
+		_getAllCourseStudentButton.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				addJoinStudentCourseToTable();
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				addJoinStudentCourseToTable();
+			}
+
+			private void addJoinStudentCourseToTable() {
+				_table.removeAll();
+				removeHeader();
+				int courseNo = Integer.parseInt(
+						_courseNameGetAllStudentCombo.getItem(_courseNameGetAllStudentCombo.getSelectionIndex()).split(",")[0]);
+				try (ResultSet rs = StudentSQLStatements.getAllStudentFromCourse(courseNo)) {
+				
+					_table.getColumn(0).setText("MATRICULATIONNO");
+					_table.getColumn(1).setText("MATRICULATIONNO");
+					_table.getColumn(2).setText("MATRICULATIONNO");
+					_table.getColumn(3).setText("MATRICULATIONNO");
+					_table.getColumn(4).setText("MATRICULATIONNO");
+					
+					while (rs.next()) {
+						TableItem item = new TableItem(_table, SWT.NONE);
+						item.setText(0, rs.getInt(1) + "");
+						item.setText(1, rs.getString(2) + "");
+						item.setText(2, rs.getString(3) + "");
+						item.setText(3, rs.getString(5) + "");
+						item.setText(4, rs.getDouble(4) + "");
+					}
+
+					for (int i = 0; i < _table.getColumnCount(); i++) {
+						_table.getColumn(i).pack();
+					}
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
+
 	}
-	
+
 	public static void refreshStudentComboBox() {
 		_comboCourse.removeAll();
-		try (ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();){
+		_courseNameGetAllStudentCombo.removeAll();
+		try (ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();) {
 			while (rsCourse.next()) {
 				_comboCourse.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
+				_courseNameGetAllStudentCombo.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	private static void removeHeader() {
+		TableColumn[] columns = _table.getColumns();
+        for (int i = 0; i < columns.length; i++) {
+            columns[i].setText("");
+        }
 	}
 }

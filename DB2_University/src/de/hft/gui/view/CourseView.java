@@ -84,23 +84,33 @@ public class CourseView {
 		_table.setHeaderVisible(true);
 		_table.setVisible(true);
 		 insertAllSQLDataIntoTableData();
-		_table.pack();
+		
 		
 		setListener();
 		return _group;
 	}
 	
-	private static void insertAllSQLDataIntoTableData() {
+	public static void insertAllSQLDataIntoTableData() {
 		
 		try {
 			ResultSet rs = CourseSQLStatements.selectAllFromCourses();
 			ResultSetMetaData rsmd = rs.getMetaData();
 			_table.removeAll();
-			for(int i = 1; i <=rsmd.getColumnCount(); i++) {
-				TableColumn column = new TableColumn(_table, SWT.NONE);
-				column.setText(rsmd.getColumnLabel(i));
-			}
 			
+			
+			if(_table.getColumnCount() == 0) {
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					TableColumn column = new TableColumn(_table, SWT.NONE);
+					column.setText(rsmd.getColumnLabel(i));
+				}
+			} else {
+				int j = 0;
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					_table.getColumn(j).setText(rsmd.getColumnLabel(i));
+					j++;
+				}
+				
+			}
 			while(rs.next()) {
 				TableItem item = new TableItem(_table, SWT.NONE);
 				item.setText(0,rs.getInt(1) + "");

@@ -57,17 +57,24 @@ public class MainWindow {
 		_tabFolder.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				refreshAll();
+				if(event.item.toString().contains("Subject")) {
+					SubjectView.refreshSubjectComboBox();
+					SubjectView.insertAllSQLDataIntoTableData();
+				} else if (event.item.toString().contains("Student")) {
+					StudentView.refreshStudentComboBox();
+					StudentView.insertAllSQLDataIntoTableData();
+				} else if (event.item.toString().contains("Professor")) {
+					ProfessorView.insertAllSQLDataIntoTableData();
+				} else if (event.item.toString().contains("Course")) {
+					CourseView.insertAllSQLDataIntoTableData();
+				} else if (event.item.toString().contains("Grades")) {
+					GradesView.refreshGradesComboBox();
+					GradesView.insertAllSQLDataIntoTableData();
+				}
 			}
 		});
 	}
 
-	private void refreshAll() {
-		GradesView.refreshGradesComboBox();
-		StudentView.refreshStudentComboBox();
-		SubjectView.refreshSubjectComboBox();
-		
-	}
 
 	public void run() {
 		_shell.open();

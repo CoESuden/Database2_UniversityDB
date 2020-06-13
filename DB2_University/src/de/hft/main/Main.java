@@ -8,7 +8,7 @@ import de.hft.gui.MainWindow;
 public class Main {
 
 	public static void main(String[] args) {
-		// DatabaseSchema.runDBSchema();
+	 DatabaseSchema.runDBSchema();
 //		SQLStatementsUtil.selectAllFromStudent();
 //		ConnectionHandler.getInstance().closeConnection();
 		

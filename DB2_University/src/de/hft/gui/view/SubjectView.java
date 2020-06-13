@@ -112,7 +112,7 @@ public class SubjectView {
 		return _group;
 	}
 
-	private static void insertAllSQLDataIntoTableData() {
+	public static void insertAllSQLDataIntoTableData() {
 
 		try {
 			ResultSet rsSubject = SubjectSQLStatements.selectAllFromSubject();
@@ -120,11 +120,20 @@ public class SubjectView {
 
 			_table.removeAll();
 
-			for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-				TableColumn column = new TableColumn(_table, SWT.NONE);
-				column.setText(rsmd.getColumnLabel(i));
+			if(_table.getColumnCount() == 0) {
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					TableColumn column = new TableColumn(_table, SWT.NONE);
+					column.setText(rsmd.getColumnLabel(i));
+				}
+			} else {
+				int j = 0;
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					_table.getColumn(j).setText(rsmd.getColumnLabel(i));
+					j++;
+				}
+				
 			}
-
+			
 			while (rsSubject.next()) {
 				TableItem item = new TableItem(_table, SWT.NONE);
 				item.setText(0, rsSubject.getInt(1) + "");
@@ -191,6 +200,5 @@ public class SubjectView {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
 	}
 }
