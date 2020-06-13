@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import de.hft.db.sqlstatements.CourseSQLStatements;
+import de.hft.db.sqlstatements.ProfessorSQLStatements;
 import de.hft.db.sqlstatements.StudentSQLStatements;
 
 public class StudentView {
@@ -49,6 +50,11 @@ public class StudentView {
 	private static Button _getAllCourseStudentButton;
 	private static Label _courseNameGetAllStudentLabel;
 	private static Combo _courseNameGetAllStudentCombo;
+	
+	private static Composite _calculateCreditPoints;
+	private static Button _calculateCreditPointsButton;
+	private static Label _calculateCreditPointsLabel;
+	private static Combo _calculateCreditPointsCombo;
 
 	public static Group createStudentView(TabFolder folder) {
 		_group = new Group(folder, SWT.NONE);
@@ -116,6 +122,20 @@ public class StudentView {
 		_courseNameGetAllStudentCombo = new Combo(_getAllCourseStudentComposite,
 				SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		_courseNameGetAllStudentCombo.setLayoutData(textData);
+		
+		_calculateCreditPoints = new Composite(_leftComposite, SWT.BORDER);
+		_calculateCreditPoints.setLayout(insertLayout);
+		_calculateCreditPoints.setLayoutData(insertComposite);
+		_calculateCreditPoints.setLayoutData(getAllCourseStudentCompositeData);
+		_calculateCreditPointsButton = new Button(_calculateCreditPoints, SWT.PUSH);
+		_calculateCreditPointsButton.setLayoutData(dataInsert);
+		_calculateCreditPointsButton.setText("Get CreditPoints of");
+		_calculateCreditPointsLabel = new Label(_calculateCreditPoints, SWT.NONE);
+		_calculateCreditPointsLabel.setText("Student:");
+		
+		_calculateCreditPointsCombo = new Combo(_calculateCreditPoints,
+				SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+		_calculateCreditPointsCombo.setLayoutData(textData);
 
 		_rightComposite = new Composite(_group, SWT.NONE);
 		_rightComposite.setLayout(new FillLayout());
@@ -157,7 +177,6 @@ public class StudentView {
 				
 			}
 			
-
 			while (rsStudent.next()) {
 				TableItem item = new TableItem(_table, SWT.NONE);
 				item.setText(0, rsStudent.getInt(1) + "");
@@ -183,7 +202,6 @@ public class StudentView {
 		_insertIntoButton.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				System.out.println("WRONG 1");
 				int matrNo = Integer.parseInt(_matrNoText.getText());
 				int courseNo = Integer.parseInt(_comboCourse.getItem(_comboCourse.getSelectionIndex()));
 				double grade = Double.parseDouble(_gradeText.getText());
@@ -194,7 +212,6 @@ public class StudentView {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				System.out.println("WRONG 2");
 				int matrNo = Integer.parseInt(_matrNoText.getText());
 				int courseNo = Integer.parseInt(_comboCourse.getItem(_comboCourse.getSelectionIndex()).split(",")[0]);
 				double grade = Double.parseDouble(_gradeText.getText());
@@ -249,17 +266,68 @@ public class StudentView {
 			}
 
 		});
+		
+		_calculateCreditPointsButton.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				addJoinCreditPointsToTable();
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				addJoinCreditPointsToTable();
+			}
+
+			private void addJoinCreditPointsToTable() {
+				_table.removeAll();
+				removeHeader();
+				int courseNo = Integer.parseInt(
+						_calculateCreditPointsCombo.getItem(_calculateCreditPointsCombo.getSelectionIndex()).split(",")[0]);
+				try (ResultSet rs = StudentSQLStatements.calculateCreditPointsSum(courseNo)) {
+					_table.getColumn(0).setText("MATRICULATIONNO");
+					_table.getColumn(1).setText("FIRSTNAME");
+					_table.getColumn(2).setText("LASTNAME");
+					_table.getColumn(3).setText("COURSENAME");
+					_table.getColumn(4).setText("SUMOFCREDITPOINTS");
+					
+					while (rs.next()) {
+						TableItem item = new TableItem(_table, SWT.NONE);
+						item.setText(0, rs.getInt(1) + "");
+						item.setText(1, rs.getString(2) + "");
+						item.setText(2, rs.getString(3) + "");
+						item.setText(3, rs.getString(4) + "");
+						item.setText(4, rs.getInt(5) + "");
+					}
+
+					for (int i = 0; i < _table.getColumnCount(); i++) {
+						_table.getColumn(i).pack();
+					}
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
 
 	}
 
 	public static void refreshStudentComboBox() {
 		_comboCourse.removeAll();
 		_courseNameGetAllStudentCombo.removeAll();
-		try (ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();) {
+		_calculateCreditPointsCombo.removeAll();
+		try (ResultSet rsCourse = CourseSQLStatements.selectAllFromCourses();
+			ResultSet rsStudent = StudentSQLStatements.selectAllFromStudent()) {
 			while (rsCourse.next()) {
 				_comboCourse.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
 				_courseNameGetAllStudentCombo.add((rsCourse.getInt(1) + "," + rsCourse.getString(2)).replace("  ", ""));
 			}
+			
+			while (rsStudent.next()) {
+				_calculateCreditPointsCombo.add((rsStudent.getInt(1) + "," + rsStudent.getString(2) + "," + rsStudent.getString(3)).replace("  ", ""));
+			}
+	
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

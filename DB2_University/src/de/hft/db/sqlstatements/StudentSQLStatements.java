@@ -66,5 +66,35 @@ public class StudentSQLStatements {
 		}
 
 	}
+	
+	public static ResultSet calculateCreditPointsSum(int courseNo) {
+		String getAllStudentFromCourse = "SELECT " + DatabaseNames.TABLE_STUDENT_NAME + "."
+				+ DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY + "," //
+				+ DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_FIRST_NAME + "," //
+				+ DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_LAST_NAME + ","//
+				+ "jointable." + DatabaseNames.TABLE_COURSE_COLUMN_COURSE_NAME + ","
+				+ "SUM(jointable2." + DatabaseNames.TABLE_SUBJECT_COLUMN_CREDIT_POINTS +") AS CREDITPOINTSSUM"
+				+ " FROM " + DatabaseNames.TABLE_STUDENT_NAME //
+				+ " JOIN " + DatabaseNames.TABLE_COURSE_NAME +" jointable ON " //
+				+ "jointable." + DatabaseNames.TABLE_STUDENT_COLUMN_COURSE_NO_FORGEIN_KEY
+				+ " = "
+				+ DatabaseNames.TABLE_STUDENT_NAME +"." + DatabaseNames.TABLE_STUDENT_COLUMN_COURSE_NO_FORGEIN_KEY//	
+				+ " JOIN " + DatabaseNames.TABLE_SUBJECT_NAME + " jointable2 ON " //
+				+ "jointable." + DatabaseNames.TABLE_STUDENT_COLUMN_COURSE_NO_FORGEIN_KEY
+				+ " = " + "jointable2." + DatabaseNames.TABLE_STUDENT_COLUMN_COURSE_NO_FORGEIN_KEY
+				+ " WHERE " +  DatabaseNames.TABLE_STUDENT_NAME + "."+ DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY + " = ?" //
+				+ " GROUP BY " + DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_MATRICULATION_NO_PRIMARY_KEY 
+				+ "," + DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_FIRST_NAME
+				+ "," + DatabaseNames.TABLE_STUDENT_NAME + "." + DatabaseNames.TABLE_STUDENT_COLUMN_LAST_NAME
+				+ ",jointable." + DatabaseNames.TABLE_COURSE_COLUMN_COURSE_NAME; //
+		try (PreparedStatement statement = ConnectionHandler.getInstance().getCurrerntConnection().prepareStatement(getAllStudentFromCourse)) {
+			statement.setInt(1, courseNo);
+			return statement.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
 
 }
