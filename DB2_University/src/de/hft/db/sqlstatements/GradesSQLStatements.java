@@ -39,4 +39,34 @@ public class GradesSQLStatements {
 		}
 	}
 	
+	
+	public static void updateGrades(int matrNo, int subjectNo, double grade) {
+		String update = "UPDATE " + DatabaseNames.TABLE_GRADES_NAME  //
+				 + " SET " + DatabaseNames.TABLE_GRADES_COLUMN_GRADE + " = " + "?"
+				 + " WHERE " + DatabaseNames.TABLE_GRADES_COLUMN_MATRICULATION_NO_FORFORGEIN_KEY + " = ? "
+				 + " AND " + DatabaseNames.TABLE_GRADES_COLUMN_SUBJECT_NO_FORGEIN_KEY + " = ?";
+		try (PreparedStatement statement = ConnectionHandler.getInstance().getCurrerntConnection().prepareStatement(update)) {
+			statement.setDouble(1, grade);
+			statement.setInt(2, matrNo);
+			statement.setInt(3, subjectNo);
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public static void deleteGrades(int matrNo, int subjectNo) {
+		String update = "DELETE FROM " + DatabaseNames.TABLE_GRADES_NAME  //
+				 + " WHERE " + DatabaseNames.TABLE_GRADES_COLUMN_MATRICULATION_NO_FORFORGEIN_KEY + " = ? "
+				 + " AND " + DatabaseNames.TABLE_GRADES_COLUMN_SUBJECT_NO_FORGEIN_KEY + " = ?";
+		try (PreparedStatement statement = ConnectionHandler.getInstance().getCurrerntConnection().prepareStatement(update)) {
+			statement.setInt(1, matrNo);
+			statement.setInt(2, subjectNo);
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 }
