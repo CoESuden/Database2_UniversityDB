@@ -7,7 +7,7 @@ It was made with much <3
 Java 8 or higher
 Eclipse IDE
 
-#Getting started
+# Getting started
 1. Download this project and import it into eclipse as a java project,
 2. Configure the class path by updating the external jars which can be found in the folder /lib
 3. Run the main method
